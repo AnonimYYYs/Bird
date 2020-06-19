@@ -1,5 +1,6 @@
 package com.example.bird
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -7,7 +8,11 @@ import android.os.Looper
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.RelativeLayout
 import kotlinx.android.synthetic.main.activity_game.*
+import kotlin.random.Random
+import androidx.core.view.marginLeft
 
 class GameActivity : AppCompatActivity() {
 
@@ -37,6 +42,7 @@ class GameActivity : AppCompatActivity() {
 
         // initializing objects
         BirdCoordinate.oppressHeight(height)
+        Columns.init(this, game_layout, width, height)
         // and bird at all
         val param = bird.layoutParams as ViewGroup.MarginLayoutParams
         param.leftMargin = (width * 0.1f).toInt()
@@ -52,7 +58,7 @@ class GameActivity : AppCompatActivity() {
                 } else {
                     onGamePause()
                 }
-                screenHandler.postDelayed(this, 50)
+                screenHandler.postDelayed(this, 25)
 
             }
 
@@ -60,19 +66,23 @@ class GameActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        BirdCoordinate.reset()
-        screenHandler.removeCallbacksAndMessages(null)
-        finish()
+        isGame = !isGame
+        // BirdCoordinate.reset()
+        // screenHandler.removeCallbacksAndMessages(null)
+        // finish()
     }
 
     fun birdJump(view: View) {
-        BirdCoordinate.jump()
+        if(isGame) {
+            BirdCoordinate.jump()
+        }
     }
 
     fun onGameUpdate(){
         val param = bird.layoutParams as ViewGroup.MarginLayoutParams
         param.bottomMargin = BirdCoordinate.lootNewHeightPoint()
         bird.layoutParams = param
+        Columns.moveColumns()
     }
 
     fun onGamePause(){
@@ -81,7 +91,7 @@ class GameActivity : AppCompatActivity() {
 }
 
 object BirdCoordinate{
-    private const val gravity = -0.0025f
+    private const val gravity = -0.00125f
     private const val jumpForce = 0.022f
     private var speed = jumpForce
     private var position = 0.5f // [0;1]
@@ -119,3 +129,76 @@ object BirdCoordinate{
     }
 }
 
+object Columns {
+
+    // values of columns
+    private const val moveSpeed = 6 // bigger value - faster columns
+    private const val columnsRate = 1.5 // bigger value - more columns
+    private const val holeSize = 0.3f
+
+    private var columnWidth: Int = 0
+
+    private var screenWidth: Int = 0
+    private var screenHeight: Int = 0
+    // контекст для создания imageView
+    private lateinit var context: Context
+    // layout на который добавим imageView
+    private lateinit var layout: RelativeLayout
+    // список имаджей
+    private var columns = arrayListOf<ImageView>()
+
+    fun init(c: Context, l: RelativeLayout, width: Int, height: Int){
+        layout = l
+        context = c
+        screenWidth = width
+        screenHeight = height
+        columnWidth = (height * 0.12f).toInt()
+    }
+
+    private fun addColumn(){
+        val imageViewUp = ImageView(context)
+        val imageViewDown = ImageView(context)
+        imageViewUp.setImageResource(R.color.colorPrimary)
+        imageViewDown.setImageResource(R.color.colorPrimary)
+
+        val params = ViewGroup.MarginLayoutParams(0, 0)
+
+        // общие параметры
+        params.leftMargin = screenWidth
+        params.width = columnWidth
+
+        // upper height
+        params.height = (0.1f * screenHeight + (0.8f - holeSize) * screenHeight * Random.nextFloat()).toInt()
+        imageViewUp.layoutParams = params
+        layout.addView(imageViewUp)
+        columns.add(imageViewUp)
+
+        // down height
+        params.topMargin = (params.height + screenHeight * holeSize).toInt()
+        params.height = screenHeight - params.topMargin
+        imageViewDown.layoutParams = params
+        layout.addView(imageViewDown)
+        columns.add(imageViewDown)
+
+
+
+        // todo add bottom align
+    }
+
+    fun moveColumns(){
+        if(columns.isEmpty()){
+            addColumn()
+        }
+        if (columns.last().marginLeft <= (screenWidth - (screenHeight / columnsRate)).toInt()) {
+            addColumn()
+        }
+        for(col in columns){
+            val params = col.layoutParams as ViewGroup.MarginLayoutParams
+            params.leftMargin -= moveSpeed
+            col.layoutParams = params
+            if(col.marginLeft == -columnWidth){
+                columns.remove(col)
+            }
+        }
+    }
+}
