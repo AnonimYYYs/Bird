@@ -16,7 +16,7 @@
         app:srcCompat="@mipmap/ic_launcher_round" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/jump_button"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#00000000"
@@ -66,7 +66,7 @@
             android:layout_height="0dp"
             android:background="#D15A5A"
             android:onClick="onButtonResume"
-            android:text="RESUME"
+            android:text="RESUME GAME"
             android:textSize="20sp"
             app:layout_constraintBottom_toTopOf="@+id/guideline6"
             app:layout_constraintEnd_toStartOf="@+id/guideline4"
@@ -74,12 +74,12 @@
             app:layout_constraintTop_toTopOf="@+id/guideline" />
 
         <Button
-            android:id="@+id/button3"
+            android:id="@+id/end_button"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:background="#D15A5A"
             android:onClick="onButtonExit"
-            android:text="EXIT"
+            android:text="TO MAIN MENU"
             android:textSize="20sp"
             app:layout_constraintBottom_toTopOf="@+id/guideline2"
             app:layout_constraintEnd_toStartOf="@+id/guideline4"

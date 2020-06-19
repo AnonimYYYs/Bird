@@ -25,6 +25,7 @@ class GameActivity : AppCompatActivity() {
 
     val screenHandler = Handler(Looper.getMainLooper())
 
+    // override functions
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
@@ -74,29 +75,37 @@ class GameActivity : AppCompatActivity() {
         isGame = !isGame
     }
 
+    override fun finish() {
+        BirdCoordinate.reset()
+        Columns.reset()
+        super.finish()
+    }
+
+    // button functions
     fun birdJump(view: View) {
         if(isGame) {
             BirdCoordinate.jump()
         }
     }
 
-    fun onGameUpdate(){
-        val param = bird.layoutParams as ViewGroup.MarginLayoutParams
-        param.bottomMargin = BirdCoordinate.lootNewHeightPoint()
-        bird.layoutParams = param
-        Columns.moveColumns()
+    fun onButtonExit(view: View) {
+        finish()
     }
 
+    fun onButtonResume(view: View) {
+        onGameResume()
+        isGame = true
+    }
+
+    // other functions
+    // -- draw pause screen
     private fun onGameStopped(){
         val params = pause_layout.layoutParams as ViewGroup.MarginLayoutParams
         params.width = width
         params.height = height
         pause_layout.layoutParams = params
         game_layout.bringChildToFront(pause_layout)
-    }
-
-    fun onGamePause(){
-
+        jump_button.isEnabled = false
     }
 
     private fun onGameResume(){
@@ -104,21 +113,21 @@ class GameActivity : AppCompatActivity() {
         params.width = 0
         params.height = 0
         pause_layout.layoutParams = params
+        jump_button.isEnabled = true
     }
 
-    fun onButtonExit(view: View) {
-
+    // -- game loop body
+    fun onGameUpdate(){
+        // bird
+        val param = bird.layoutParams as ViewGroup.MarginLayoutParams
+        param.bottomMargin = BirdCoordinate.lootNewHeightPoint()
+        bird.layoutParams = param
+        // columns
+        Columns.moveColumns()
     }
 
-    fun onButtonResume(view: View) {
-        isGame = true
-        onGameResume()
-    }
+    fun onGamePause(){
 
-    override fun finish() {
-        BirdCoordinate.reset()
-        Columns.reset()
-        super.finish()
     }
 }
 
