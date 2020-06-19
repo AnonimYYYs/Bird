@@ -66,10 +66,12 @@ class GameActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
+        if(isGame){
+            onGameStopped()
+        } else {
+            onGameResume()
+        }
         isGame = !isGame
-        // BirdCoordinate.reset()
-        // screenHandler.removeCallbacksAndMessages(null)
-        // finish()
     }
 
     fun birdJump(view: View) {
@@ -85,8 +87,38 @@ class GameActivity : AppCompatActivity() {
         Columns.moveColumns()
     }
 
+    private fun onGameStopped(){
+        val params = pause_layout.layoutParams as ViewGroup.MarginLayoutParams
+        params.width = width
+        params.height = height
+        pause_layout.layoutParams = params
+        game_layout.bringChildToFront(pause_layout)
+    }
+
     fun onGamePause(){
 
+    }
+
+    private fun onGameResume(){
+        val params = pause_layout.layoutParams as ViewGroup.MarginLayoutParams
+        params.width = 0
+        params.height = 0
+        pause_layout.layoutParams = params
+    }
+
+    fun onButtonExit(view: View) {
+
+    }
+
+    fun onButtonResume(view: View) {
+        isGame = true
+        onGameResume()
+    }
+
+    override fun finish() {
+        BirdCoordinate.reset()
+        Columns.reset()
+        super.finish()
     }
 }
 
@@ -192,13 +224,23 @@ object Columns {
         if (columns.last().marginLeft <= (screenWidth - (screenHeight / columnsRate)).toInt()) {
             addColumn()
         }
-        for(col in columns){
+        var colIterator = columns.iterator()
+        for(col in colIterator){
             val params = col.layoutParams as ViewGroup.MarginLayoutParams
             params.leftMargin -= moveSpeed
             col.layoutParams = params
-            if(col.marginLeft == -columnWidth){
-                columns.remove(col)
+            if(col.marginLeft <= -columnWidth){
+                layout.removeView(col)
+                colIterator.remove()
             }
+        }
+    }
+
+    fun reset(){
+        val colIterator = columns.iterator()
+        for(col in colIterator){
+            layout.removeView(col)
+            colIterator.remove()
         }
     }
 }
