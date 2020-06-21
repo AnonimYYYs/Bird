@@ -48,6 +48,7 @@ class GameActivity : AppCompatActivity() {
         // initializing objects
         BirdCoordinate.oppressHeight(height)
         Columns.init(this, game_layout, width, height)
+
         // and bird at all
         val param = bird.layoutParams as ViewGroup.MarginLayoutParams
         param.leftMargin = (width * 0.1f).toInt()
@@ -71,12 +72,19 @@ class GameActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
+        /*
         if(isGame){
             onGameStopped()
         } else {
             onGameResume()
         }
         isGame = !isGame
+
+         */
+        if(isGame){
+            onGameEnded()
+            isGame = !isGame
+        }
     }
 
     override fun finish() {
@@ -86,7 +94,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     // button functions
-    fun birdJump(view: View) {
+    fun onBirdJump(view: View) {
         if(isGame) {
             BirdCoordinate.jump()
         }
@@ -101,6 +109,15 @@ class GameActivity : AppCompatActivity() {
         isGame = true
     }
 
+    fun onToMainMenu(view: View){
+        finish()
+    }
+
+    fun onGameRestart(view: View){
+        BirdCoordinate.reset()
+        Columns.reset()
+        onGameRestarted()
+    }
     // other functions
     // -- draw pause screen
     private fun onGameStopped(){
@@ -119,6 +136,27 @@ class GameActivity : AppCompatActivity() {
         pause_layout.layoutParams = params
         jump_button.isEnabled = true
     }
+
+    // -- draw endgame screen
+    private fun onGameEnded(){
+        val params = endgame_layout.layoutParams as ViewGroup.MarginLayoutParams
+        params.width = width
+        params.height = height
+        endgame_layout.layoutParams = params
+        game_layout.bringChildToFront(endgame_layout)
+        jump_button.isEnabled = false
+    }
+
+    private fun onGameRestarted(){
+        val params = endgame_layout.layoutParams as ViewGroup.MarginLayoutParams
+        params.width = 0
+        params.height = 0
+        endgame_layout.layoutParams = params
+        game_layout.bringChildToFront(endgame_layout)
+        jump_button.isEnabled = true
+        isGame = true
+    }
+
 
     // -- game loop body
     fun onGameUpdate(){
