@@ -14,9 +14,9 @@ import kotlinx.android.synthetic.main.activity_game.*
 import kotlin.random.Random
 import androidx.core.view.marginLeft
 
-data class Column (val upper: ImageView, val lower: ImageView){
+data class Column (val upper: ImageView, val lower: ImageView)
 
-}
+data class Hole (val upper: Int, val lower: Int)
 
 class GameActivity : AppCompatActivity() {
 
@@ -26,6 +26,7 @@ class GameActivity : AppCompatActivity() {
     private var birdSize = 0.0f
 
     private var isGame = true
+    private var isPause = false
 
     val screenHandler = Handler(Looper.getMainLooper())
 
@@ -59,7 +60,7 @@ class GameActivity : AppCompatActivity() {
 
         screenHandler.post(object: Runnable{
             override fun run() {
-                if(isGame) {
+                if(isGame && !isPause) {
                     onGameUpdate()
                 } else {
                     onGamePause()
@@ -72,19 +73,13 @@ class GameActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        /*
-        if(isGame){
+        if(!isPause){
             onGameStopped()
         } else {
             onGameResume()
         }
-        isGame = !isGame
+        isPause = !isPause
 
-         */
-        if(isGame){
-            onGameEnded()
-            isGame = !isGame
-        }
     }
 
     override fun finish() {
@@ -95,7 +90,7 @@ class GameActivity : AppCompatActivity() {
 
     // button functions
     fun onBirdJump(view: View) {
-        if(isGame) {
+        if(!isPause && isGame) {
             BirdCoordinate.jump()
         }
     }
@@ -106,7 +101,7 @@ class GameActivity : AppCompatActivity() {
 
     fun onButtonResume(view: View) {
         onGameResume()
-        isGame = true
+        isPause = false
     }
 
     fun onToMainMenu(view: View){
@@ -118,6 +113,7 @@ class GameActivity : AppCompatActivity() {
         Columns.reset()
         onGameRestarted()
     }
+
     // other functions
     // -- draw pause screen
     private fun onGameStopped(){
@@ -155,6 +151,7 @@ class GameActivity : AppCompatActivity() {
         game_layout.bringChildToFront(endgame_layout)
         jump_button.isEnabled = true
         isGame = true
+        isPause = false
     }
 
 
@@ -166,6 +163,7 @@ class GameActivity : AppCompatActivity() {
         bird.layoutParams = param
         // columns
         Columns.moveColumns()
+
     }
 
     fun onGamePause(){
@@ -174,8 +172,8 @@ class GameActivity : AppCompatActivity() {
 }
 
 object BirdCoordinate{
-    private const val gravity = -0.00125f
-    private const val jumpForce = 0.022f
+    private const val gravity = -0.0002f//-0.00125f
+    private const val jumpForce = 0.005f//0.022f
     private var speed = jumpForce
     private var position = 0.5f // [0;1]
     private var windowHeight = 0
@@ -210,6 +208,8 @@ object BirdCoordinate{
         speed = jumpForce
         position = 0.5f
     }
+
+
 }
 
 object Columns {
@@ -217,7 +217,7 @@ object Columns {
     // values of columns
     private const val moveSpeed = 6 // bigger value - faster columns
     private const val columnsRate = 1.5 // bigger value - more columns
-    private const val holeSize = 0.3f
+    private const val holeSize = 0.6f
 
     private var columnWidth: Int = 0
 
@@ -263,9 +263,6 @@ object Columns {
         val newColumn = Column(imageViewUp, imageViewDown)
         columns.add(newColumn)
 
-
-
-        // todo add bottom align
     }
 
     fun moveColumns(){
@@ -275,7 +272,7 @@ object Columns {
         if (columns.last().upper.marginLeft <= (screenWidth - (screenHeight / columnsRate)).toInt()) {
             addColumn()
         }
-        var colIterator = columns.iterator()
+        val colIterator = columns.iterator()
         for(col in colIterator){
             val paramsUpper = col.upper.layoutParams as ViewGroup.MarginLayoutParams
             val paramsLower = col.lower.layoutParams as ViewGroup.MarginLayoutParams
@@ -299,4 +296,17 @@ object Columns {
             colIterator.remove()
         }
     }
+
+    fun isBirdBetween(): Boolean {
+        var isBetween = false
+        for(col in columns){
+            if(!((col.upper.marginLeft > (screenHeight + screenWidth) * 0.1f) || (col.upper.marginLeft + columnWidth < screenWidth * 0.1f))){
+                isBetween = true
+                break
+            }
+        }
+        return isBetween
+    }
+
+
 }
