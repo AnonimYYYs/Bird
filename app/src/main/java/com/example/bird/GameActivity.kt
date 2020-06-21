@@ -14,6 +14,10 @@ import kotlinx.android.synthetic.main.activity_game.*
 import kotlin.random.Random
 import androidx.core.view.marginLeft
 
+data class Column (val upper: ImageView, val lower: ImageView){
+
+}
+
 class GameActivity : AppCompatActivity() {
 
     // sizes
@@ -186,7 +190,7 @@ object Columns {
     // layout на который добавим imageView
     private lateinit var layout: RelativeLayout
     // список имаджей
-    private var columns = arrayListOf<ImageView>()
+    private var columns = arrayListOf<Column>()
 
     fun init(c: Context, l: RelativeLayout, width: Int, height: Int){
         layout = l
@@ -212,14 +216,14 @@ object Columns {
         params.height = (0.1f * screenHeight + (0.8f - holeSize) * screenHeight * Random.nextFloat()).toInt()
         imageViewUp.layoutParams = params
         layout.addView(imageViewUp)
-        columns.add(imageViewUp)
 
         // down height
         params.topMargin = (params.height + screenHeight * holeSize).toInt()
         params.height = screenHeight - params.topMargin
         imageViewDown.layoutParams = params
         layout.addView(imageViewDown)
-        columns.add(imageViewDown)
+        val newColumn = Column(imageViewUp, imageViewDown)
+        columns.add(newColumn)
 
 
 
@@ -230,16 +234,20 @@ object Columns {
         if(columns.isEmpty()){
             addColumn()
         }
-        if (columns.last().marginLeft <= (screenWidth - (screenHeight / columnsRate)).toInt()) {
+        if (columns.last().upper.marginLeft <= (screenWidth - (screenHeight / columnsRate)).toInt()) {
             addColumn()
         }
         var colIterator = columns.iterator()
         for(col in colIterator){
-            val params = col.layoutParams as ViewGroup.MarginLayoutParams
-            params.leftMargin -= moveSpeed
-            col.layoutParams = params
-            if(col.marginLeft <= -columnWidth){
-                layout.removeView(col)
+            val paramsUpper = col.upper.layoutParams as ViewGroup.MarginLayoutParams
+            val paramsLower = col.lower.layoutParams as ViewGroup.MarginLayoutParams
+            paramsUpper.leftMargin -= moveSpeed
+            paramsLower.leftMargin -= moveSpeed
+            col.upper.layoutParams = paramsUpper
+            col.lower.layoutParams = paramsLower
+            if(col.upper.marginLeft <= -columnWidth){
+                layout.removeView(col.upper)
+                layout.removeView(col.lower)
                 colIterator.remove()
             }
         }
@@ -248,7 +256,8 @@ object Columns {
     fun reset(){
         val colIterator = columns.iterator()
         for(col in colIterator){
-            layout.removeView(col)
+            layout.removeView(col.upper)
+            layout.removeView(col.lower)
             colIterator.remove()
         }
     }
