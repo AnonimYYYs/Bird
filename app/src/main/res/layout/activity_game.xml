@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/game_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
 
     <ImageView
         android:id="@+id/bird"
@@ -181,5 +182,47 @@
             app:layout_constraintGuide_percent="0.4" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/upper"
+        android:layout_width="100dp"
+        android:layout_height="20dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="0dp"
+        android:background="#5CFFEB3B"
+        android:text="TextView" />
+
+    <TextView
+        android:id="@+id/lower"
+        android:layout_width="100dp"
+        android:layout_height="20dp"
+        android:layout_below="@+id/upper"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="0dp"
+        android:background="#6BA6FF00"
+        android:text="TextView" />
+
+    <TextView
+        android:id="@+id/birdUpper"
+        android:layout_width="100dp"
+        android:layout_height="20dp"
+        android:layout_below="@+id/lower"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="0dp"
+        android:text="TextView" />
+
+    <TextView
+        android:id="@+id/birdLower"
+        android:layout_width="100dp"
+        android:layout_height="20dp"
+        android:layout_below="@+id/birdUpper"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="0dp"
+        android:text="TextView" />
 
 </RelativeLayout>

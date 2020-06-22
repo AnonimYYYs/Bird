@@ -13,6 +13,7 @@ import android.widget.RelativeLayout
 import kotlinx.android.synthetic.main.activity_game.*
 import kotlin.random.Random
 import androidx.core.view.marginLeft
+import androidx.core.view.marginTop
 
 data class Column (val upper: ImageView, val lower: ImageView)
 
@@ -154,7 +155,6 @@ class GameActivity : AppCompatActivity() {
         isPause = false
     }
 
-
     // -- game loop body
     fun onGameUpdate(){
         // bird
@@ -163,6 +163,17 @@ class GameActivity : AppCompatActivity() {
         bird.layoutParams = param
         // columns
         Columns.moveColumns()
+        if(BirdCoordinate.isCollided()){
+            game_layout.setBackgroundResource(R.color.colorPrimaryDark)
+        } else {
+            game_layout.setBackgroundResource(R.color.colorAccent)
+        }
+        var hl = Columns.lootHoleSize()
+        upper.text = hl.upper.toString()
+        lower.text = hl.lower.toString()
+        hl = BirdCoordinate.lootBird()
+        birdUpper.text = hl.upper.toString()
+        birdLower.text = hl.lower.toString()
 
     }
 
@@ -209,7 +220,20 @@ object BirdCoordinate{
         position = 0.5f
     }
 
+    fun lootBird(): Hole {
+        return Hole((windowHeight * (position * 0.9f + 0.1f)).toInt(),(position * windowHeight * 0.9f).toInt())
+    }
 
+    fun isCollided(): Boolean{
+        var isCollided = false
+        if(Columns.isBirdBetween()){
+            val hole = Columns.lootHoleSize()
+            if(hole.upper <= windowHeight * (position * 0.9f + 0.1f) || hole.lower >= position * windowHeight * 0.9f){
+                isCollided = true
+            }
+        }
+        return(isCollided)
+    }
 }
 
 object Columns {
@@ -229,6 +253,9 @@ object Columns {
     private lateinit var layout: RelativeLayout
     // список имаджей
     private var columns = arrayListOf<Column>()
+
+    // для дыры, номер колонны которая сейчас где птичка
+    private var currColumn: Column? = null
 
     fun init(c: Context, l: RelativeLayout, width: Int, height: Int){
         layout = l
@@ -299,14 +326,23 @@ object Columns {
 
     fun isBirdBetween(): Boolean {
         var isBetween = false
+        currColumn = null
         for(col in columns){
             if(!((col.upper.marginLeft > (screenHeight + screenWidth) * 0.1f) || (col.upper.marginLeft + columnWidth < screenWidth * 0.1f))){
                 isBetween = true
+                currColumn = col
                 break
             }
         }
         return isBetween
     }
 
+    fun lootHoleSize(): Hole {
+        return if(currColumn != null){
+            Hole(screenHeight - currColumn!!.upper.height, screenHeight - currColumn!!.lower.marginTop)
+        } else {
+            Hole(0, 0)
+        }
+    }
 
 }
