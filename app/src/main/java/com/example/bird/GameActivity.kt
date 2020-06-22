@@ -89,6 +89,12 @@ class GameActivity : AppCompatActivity() {
         super.finish()
     }
 
+    override fun onUserLeaveHint() {
+        isPause = true
+        onGameStopped()
+        super.onUserLeaveHint()
+    }
+
     // button functions
     fun onBirdJump(view: View) {
         if(!isPause && isGame) {
@@ -164,16 +170,10 @@ class GameActivity : AppCompatActivity() {
         // columns
         Columns.moveColumns()
         if(BirdCoordinate.isCollided()){
-            game_layout.setBackgroundResource(R.color.colorPrimaryDark)
-        } else {
-            game_layout.setBackgroundResource(R.color.colorAccent)
+            isGame = false
+            onGameEnded()
         }
-        var hl = Columns.lootHoleSize()
-        upper.text = hl.upper.toString()
-        lower.text = hl.lower.toString()
-        hl = BirdCoordinate.lootBird()
-        birdUpper.text = hl.upper.toString()
-        birdLower.text = hl.lower.toString()
+
 
     }
 
@@ -183,8 +183,8 @@ class GameActivity : AppCompatActivity() {
 }
 
 object BirdCoordinate{
-    private const val gravity = -0.0002f//-0.00125f
-    private const val jumpForce = 0.005f//0.022f
+    private const val gravity = -0.00125f
+    private const val jumpForce = 0.022f
     private var speed = jumpForce
     private var position = 0.5f // [0;1]
     private var windowHeight = 0
@@ -220,10 +220,6 @@ object BirdCoordinate{
         position = 0.5f
     }
 
-    fun lootBird(): Hole {
-        return Hole((windowHeight * (position * 0.9f + 0.1f)).toInt(),(position * windowHeight * 0.9f).toInt())
-    }
-
     fun isCollided(): Boolean{
         var isCollided = false
         if(Columns.isBirdBetween()){
@@ -241,7 +237,7 @@ object Columns {
     // values of columns
     private const val moveSpeed = 6 // bigger value - faster columns
     private const val columnsRate = 1.5 // bigger value - more columns
-    private const val holeSize = 0.6f
+    private const val holeSize = 0.35f
 
     private var columnWidth: Int = 0
 
