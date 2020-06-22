@@ -16,10 +16,17 @@ import kotlinx.android.synthetic.main.activity_game.*
 import kotlin.random.Random
 import androidx.core.view.marginLeft
 import androidx.core.view.marginTop
+import kotlin.math.PI
+import kotlin.math.atan
 
 data class Column (val upper: ImageView, val lower: ImageView)
 
 data class Hole (val upper: Int, val lower: Int)
+
+const val COLUMN_SPEED = 6  // bigger value - faster columns
+
+// todo remove later
+var info = "0"
 
 class GameActivity : AppCompatActivity() {
 
@@ -189,8 +196,11 @@ class GameActivity : AppCompatActivity() {
             isGame = false
             onGameEnded()
         }
-        score_view.text = (BirdCoordinate.lootScore()).toString()
 
+        //score_view.text = (BirdCoordinate.lootScore()).toString() todo(make later)
+        bird.rotation = BirdCoordinate.lootAngle()
+        info = "${bird.rotation}"
+        score_view.text = info
     }
 
     fun onGamePause(){
@@ -244,6 +254,8 @@ object BirdCoordinate{
             }
         }
 
+        info = "${speed * windowHeight}"
+
         return((windowHeight * 0.9f * position).toInt())
     }
 
@@ -280,15 +292,15 @@ object BirdCoordinate{
         return(isCollided)
     }
 
-    fun lootScore(): Int {
-        return score
+    fun lootAngle(): Float {
+        return (-atan((speed * windowHeight * 0.5f) / COLUMN_SPEED) * 180 / PI).toFloat()
     }
 }
 
 object Columns {
 
     // values of columns
-    private const val moveSpeed = 6 // bigger value - faster columns
+    private const val moveSpeed = COLUMN_SPEED
     private const val columnsRate = 1.5 // bigger value - more columns
     private const val holeSize = 0.37f
 
