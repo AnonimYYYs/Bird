@@ -49,6 +49,7 @@ class GameActivity : AppCompatActivity() {
 
         // initializing objects
         BirdCoordinate.oppressHeight(height)
+        BirdCoordinate.oppressBirdCenter((width * 0.1f + birdSize / 2).toInt())
         Columns.init(this, game_layout, width, height)
 
         // and bird at all
@@ -173,8 +174,7 @@ class GameActivity : AppCompatActivity() {
             isGame = false
             onGameEnded()
         }
-
-
+        score.text = BirdCoordinate.lootScore().toString()
     }
 
     fun onGamePause(){
@@ -187,9 +187,16 @@ object BirdCoordinate{
     private const val jumpForce = 0.022f
     private var speed = jumpForce
     private var position = 0.5f // [0;1]
+    private var birdCenter = 0
     private var windowHeight = 0
+    private var score = 0
+    private var isInColumn = false
+    private var isAboveCenter = false
 
+    // that's doing every tick
     fun lootNewHeightPoint(): Int {
+
+        // oppressing new bird point
         speed += gravity
         position += speed
         if(position < 0.0f){
@@ -204,11 +211,32 @@ object BirdCoordinate{
         if(speed < -0.5f){
             speed = -0.5f
         }
+
+        // oppressing score if center of bird crossed center of current column
+        val colCenter = Columns.lootCurrColumnCenter()
+        if(colCenter == 0){
+            isInColumn = false
+        } else {
+            if(!isInColumn){
+                isInColumn = true
+                isAboveCenter = false
+            } else {
+                if(!isAboveCenter && (colCenter < birdCenter)){
+                    isAboveCenter = true
+                    score++
+                }
+            }
+        }
+
         return((windowHeight * 0.9f * position).toInt())
     }
 
     fun oppressHeight(oppressedWindowHeight: Int){
         windowHeight = oppressedWindowHeight
+    }
+
+    fun oppressBirdCenter(oppressedCenter: Int){
+        birdCenter = oppressedCenter
     }
 
     fun jump(){
@@ -218,6 +246,7 @@ object BirdCoordinate{
     fun reset(){
         speed = jumpForce
         position = 0.5f
+        score = 0
     }
 
     fun isCollided(): Boolean{
@@ -230,6 +259,10 @@ object BirdCoordinate{
         }
         return(isCollided)
     }
+
+    fun lootScore(): Int {
+        return score
+    }
 }
 
 object Columns {
@@ -237,7 +270,7 @@ object Columns {
     // values of columns
     private const val moveSpeed = 6 // bigger value - faster columns
     private const val columnsRate = 1.5 // bigger value - more columns
-    private const val holeSize = 0.35f
+    private const val holeSize = 0.6f
 
     private var columnWidth: Int = 0
 
@@ -341,4 +374,11 @@ object Columns {
         }
     }
 
+    fun lootCurrColumnCenter(): Int {
+        return if(currColumn != null){
+            currColumn!!.upper.marginLeft + (currColumn!!.upper.width / 2)
+        } else {
+            0
+        }
+    }
 }
