@@ -1,6 +1,8 @@
 package com.example.bird
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -29,12 +31,17 @@ class GameActivity : AppCompatActivity() {
     private var isGame = true
     private var isPause = false
 
+    private var totalScore = 0
+
     val screenHandler = Handler(Looper.getMainLooper())
 
     // override functions
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
+
+        // getting data from main screen intent
+        totalScore = intent.extras?.getInt("topScore") ?: 0
 
         // getting size of window
         val metrics = DisplayMetrics()
@@ -85,8 +92,15 @@ class GameActivity : AppCompatActivity() {
     }
 
     override fun finish() {
+        // resetting bird and columns
+        totalScore += BirdCoordinate.lootBirdScore()
         BirdCoordinate.reset()
         Columns.reset()
+
+        // giving back to main menu total score
+        val answerIntent = Intent()
+        answerIntent.putExtra("newScore", totalScore)
+        setResult(Activity.RESULT_OK, answerIntent)
         super.finish()
     }
 
@@ -117,6 +131,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     fun onGameRestart(view: View){
+        totalScore += BirdCoordinate.lootBirdScore()
         BirdCoordinate.reset()
         Columns.reset()
         onGameRestarted()
@@ -174,7 +189,8 @@ class GameActivity : AppCompatActivity() {
             isGame = false
             onGameEnded()
         }
-        score.text = BirdCoordinate.lootScore().toString()
+        score_view.text = (BirdCoordinate.lootScore()).toString()
+
     }
 
     fun onGamePause(){
@@ -231,6 +247,10 @@ object BirdCoordinate{
         return((windowHeight * 0.9f * position).toInt())
     }
 
+    fun lootBirdScore(): Int {
+        return score
+    }
+
     fun oppressHeight(oppressedWindowHeight: Int){
         windowHeight = oppressedWindowHeight
     }
@@ -270,7 +290,7 @@ object Columns {
     // values of columns
     private const val moveSpeed = 6 // bigger value - faster columns
     private const val columnsRate = 1.5 // bigger value - more columns
-    private const val holeSize = 0.6f
+    private const val holeSize = 0.37f
 
     private var columnWidth: Int = 0
 
